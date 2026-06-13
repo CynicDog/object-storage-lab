@@ -9,9 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip \
  && rm -rf /var/lib/apt/lists/*
 
-RUN curl -fsSL https://downloads.rclone.org/rclone-current-linux-amd64.deb -o /tmp/rclone.deb \
- && dpkg -i /tmp/rclone.deb \
- && rm /tmp/rclone.deb
+RUN curl -fsSL https://rclone.org/install.sh | bash
 
 RUN echo "user_allow_other" >> /etc/fuse.conf
 
