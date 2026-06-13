@@ -18,6 +18,11 @@ echo "[boot] Azurite is ready."
 echo "[boot] Running setup ..."
 AZURITE_HOST="${AZURITE_HOST}" java -jar "${JAR}" setup
 
+# blobfuse2 shared-key auth is incompatible with Azurite's path-based URL scheme.
+# Generate a SAS token via the Java SDK (which works) and hand it to blobfuse2.
+SAS_TOKEN=$(AZURITE_HOST="${AZURITE_HOST}" java -jar "${JAR}" sas)
+echo "[boot] SAS token generated."
+
 mkdir -p "${MOUNT_POINT}" /tmp/bf2-cache /tmp/bf2-log
 
 cat > /tmp/blobfuse2.yaml << YAML
@@ -48,7 +53,7 @@ attr_cache:
 azstorage:
   type: block
   account-name: devstoreaccount1
-  account-key: Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==
+  sas: ${SAS_TOKEN}
   endpoint: http://${AZURITE_HOST}/devstoreaccount1
   container: ${CONTAINER}
   virtual-directory: true
