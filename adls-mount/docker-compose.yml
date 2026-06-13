@@ -6,8 +6,7 @@ services:
     ports:
       - "10000:10000"
     healthcheck:
-      # alpine-based image has nc from busybox
-      test: ["CMD", "nc", "-z", "localhost", "10000"]
+      test: ["CMD", "node", "-e", "require('net').connect(10000,'127.0.0.1').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))"]
       interval: 3s
       timeout: 5s
       retries: 10

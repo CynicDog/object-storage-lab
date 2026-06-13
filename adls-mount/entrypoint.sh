@@ -4,12 +4,10 @@ set -euo pipefail
 AZURITE_HOST="${AZURITE_HOST:-azurite:10000}"
 MOUNT_POINT="${MOUNT_POINT:-/mnt/adls}"
 CONTAINER="${CONTAINER:-demo}"
-# Large TTL so the stale-listing window is obvious during the demo
 CACHE_TTL="${CACHE_TTL:-3600}"
 
 JAR=/workspace/build/libs/adls-mount.jar
 
-# ── 1. wait for Azurite ───────────────────────────────────────────────────────
 echo "[boot] Waiting for Azurite at ${AZURITE_HOST} ..."
 until curl -sf --max-time 2 "http://${AZURITE_HOST}/" > /dev/null 2>&1 \
    || curl -s  --max-time 2 "http://${AZURITE_HOST}/devstoreaccount1" > /dev/null 2>&1; do
@@ -17,11 +15,9 @@ until curl -sf --max-time 2 "http://${AZURITE_HOST}/" > /dev/null 2>&1 \
 done
 echo "[boot] Azurite is ready."
 
-# ── 2. upload the 9 historical blobs (before the mount sees anything) ─────────
 echo "[boot] Running setup ..."
 AZURITE_HOST="${AZURITE_HOST}" java -jar "${JAR}" setup
 
-# ── 3. blobfuse2 mount ────────────────────────────────────────────────────────
 mkdir -p "${MOUNT_POINT}" /tmp/bf2-cache /tmp/bf2-log
 
 cat > /tmp/blobfuse2.yaml << YAML
@@ -63,9 +59,7 @@ blobfuse2 mount "${MOUNT_POINT}" --config-file=/tmp/blobfuse2.yaml
 sleep 2
 echo "[boot] Mount ready."
 
-# ── 4. run the demo ───────────────────────────────────────────────────────────
 echo ""
 AZURITE_HOST="${AZURITE_HOST}" java -jar "${JAR}" demo "${MOUNT_POINT}"
 
-# ── 5. cleanup ────────────────────────────────────────────────────────────────
 blobfuse2 unmount "${MOUNT_POINT}" 2>/dev/null || true
