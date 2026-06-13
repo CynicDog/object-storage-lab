@@ -3,14 +3,10 @@ package io.github.cynicdog.adls;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
-import com.azure.storage.blob.sas.BlobContainerSasPermission;
-import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 
 import java.io.ByteArrayInputStream;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 public class Main {
@@ -37,19 +33,6 @@ public class Main {
 
         if ("setup".equals(mode)) {
             setup(container);
-        } else if ("sas".equals(mode)) {
-            // Print a container-scoped SAS token that blobfuse2 can use.
-            // The Java SDK computes it correctly against Azurite's path-based URLs;
-            // blobfuse2 shared-key auth does not.
-            BlobContainerSasPermission perm = new BlobContainerSasPermission()
-                    .setReadPermission(true)
-                    .setWritePermission(true)
-                    .setDeletePermission(true)
-                    .setListPermission(true)
-                    .setCreatePermission(true);
-            BlobServiceSasSignatureValues vals = new BlobServiceSasSignatureValues(
-                    OffsetDateTime.now(ZoneOffset.UTC).plusHours(2), perm);
-            System.out.print(container.generateSas(vals));
         } else {
             System.out.println("=== ADLS Mount Behavior Lab ===");
             System.out.println("Azurite: " + azuriteHost);
